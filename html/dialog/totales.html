@@ -1,0 +1,73 @@
+<?prg
+#include "lib/tweb/tweb.ch" 
+  local o, oDlg
+	local hTotales	:= pvalue(1)
+	
+	DEFINE DIALOG oDlg
+		DEFINE FORM o ID 'totales' API 'myapi' OF oDlg
+			o:lDessign := .f.
+			//o:cSizing   := ''
+		
+		INIT FORM o
+		
+
+		ROWGROUP o HALIGN 'bottom'
+			COL o GRID 12
+					SEPARATOR o LABEL '<i class="fa fa-dollar-sign" aria-hidden="true"></i>&nbsp;Totales'
+			ENDCOL o			
+		ENDROW o
+
+		ROW o HALIGN 'bottom'
+			SAY LABEL '<h6><b>Subtotal</b></h6>' GRID 4 OF o
+			SAY CLASS 'crumbs' VALUE Transform(hTotales['subtotal'], '999,999.99') ALIGN 'right' GRID 4 OF o		
+		ENDROW o
+
+		ROW o HALIGN 'bottom'
+			SAY LABEL '<h6><b>Descuento</b></h6>' GRID 4 OF o			
+		ENDROW o
+
+		ROW o HALIGN 'bottom'			
+				SAY LABEL '<h6><b>Impuesto</b></h6>' GRID 4 OF o			
+		ENDROW o
+
+		ROW o HALIGN 'bottom'
+			SAY LABEL '<h6><b>Total</b></h6>' GRID 4 OF o			
+		ENDROW o
+
+		ROWGROUP o CLASS "pt-3"
+			COL o GRID 12
+				HTML o INLINE '<div class="modal-footer custom-footer border-0 pb-0 mb-0">' 
+				BUTTON LABEL '&nbsp;Cerrar'  ICON '<i class="fa fa-times" aria-hidden="true"></i>' ACTION 'close_total' CLASS 'btn btn-text btn-secondary' GRID 0 OF o
+				BUTTON LABEL '&nbsp;Aceptar' ICON '<i class="fa fa-check" aria-hidden="true"></i>' 	CLASS 'btn btn-text btn-primary' 	 GRID 0 OF o
+				HTML o INLINE '</div>'
+			ENDCOL o
+		ENDROW o
+					
+	ENDFORM o
+	
+	HTML o
+		<style>	
+		.btn .btn-text {
+    		margin-left: 1px; /* Ajusta el valor según tus necesidades */
+		}
+				.crumbs {
+				width: 100%;
+				background-color: #2F88E0;
+				color: white;
+				padding-left: 20px;
+				font-size: 20px;					
+				font-family: Arial, Helvetica, sans-serif;
+				border-top: 1px solid white;
+		}
+
+		.custom-footer {
+  			border: none;
+				margin-bottom: 0;
+  			padding-bottom: 0;
+			}
+	</style>
+	
+ENDTEXT	
+
+	INIT DIALOG oDlg RETURN
+?>

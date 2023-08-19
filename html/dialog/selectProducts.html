@@ -1,0 +1,110 @@
+<?prg
+#include "lib/tweb/tweb.ch" 
+
+  local o, oDlg, aData, hCredentials
+	aData := listProducts()
+		
+	DEFINE DIALOG oDlg	
+	oDlg:AddCss( 'https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator_simple.min.css' )	
+
+		DEFINE FORM o ID 'listProducts' API 'myapi' OF oDlg
+		o:lDessign 	:= .f.
+		o:lFluid	:= .t.
+
+		INIT FORM o
+		
+	 // Init Browse
+	 ROW o
+	 COL o GRID 12
+
+	 hLangs := { ;
+					'es' => { ;
+						'pagination' => { ;
+							'page_size'     => 'Tamaño de página', ;
+							'page_title'    => 'Ir a la página', ;
+							'first'         => '<<', ;
+							'first_title'   => 'Primera página', ;
+							'last'          => '>>', ; 
+							'last_title'    => 'Última página', ;
+							'prev'          => '<', ;
+							'prev_title'    => 'Página anterior', ;
+							'next'          => '>', ;
+							'next_title'    => 'Página siguiente', ;
+							'all'           => 'Todo', ;
+							'counter'       => { 'showing' => '', 'of' => 'de', 'rows' => 'filas', 'pages'   => 'páginas' } ; 
+						} ;
+					} ;
+					}
+	 
+		 aOptions := { ;			 
+			 'height' => '350px',	;
+			 'placeholder'  => '', ;
+			 'layout' => 'fitColumns', ;
+			 'locale' => 'es' , ;			 
+			 'selectable' => 1 , ;
+			 'initialSort' => nil, ;
+			 'pagination' => "local", ;
+    	 'paginationSize' => 15, ;
+			 'paginationSizeSelector' => .f., ;
+    	 'movableColumns' => .f. , ;
+			 'langs'        => hLangs ;
+		 }
+
+		 aEvents := { { 'name' => 'cellClick', 'function' => 'CellClickBrowse' }	}		 
+
+		 DEFINE BROWSE oBrw ID 'tableListProducts' OPTIONS aOptions EVENTS aEvents OF o
+			 COL oCol TO oBrw CONFIG { 'title' => "Código", 'field' => "codigo"		, 'cssClass' => "no-bold cell-font-size", 'resizable' => .f. , 'headerSort' => .f. , ;
+			 																																											'headerFilter' => .t. , 'headerFilterPlaceholder' => 'Buscar código...', 'width' => 140 }
+			 COL oCol TO oBrw CONFIG { 'title' => "Producto", 'field' => "producto"	, 'cssClass' => "no-bold cell-font-size", 'resizable' => .f. , 'headerSort' => .f. , ;
+			 																																												'headerFilter' => .t. , 'headerFilterPlaceholder' => 'Buscar nombre...', 'width' => 360  }
+			COL oCol TO oBrw CONFIG { 'title' => "Cantidad"	, 'field' => "cantidad"	, 'headerSort' => .f. , 'cssClass' => "no-bold cell-font-size", 'resizable' => .f., ;
+																																												 'editor' => "number"	, 'width' => 80  }		  
+		  COL oCol TO oBrw CONFIG { 'field' => "agregar", 'headerSort' => .f. , 'cssClass' => "no-bold cell-font-size", 'resizable' => .f., 'formatter' => 'addbutton', ;
+																																							  					 'width' => 80  }
+
+			 INIT BROWSE oBrw DATA aData
+	 ENDCOL o	 
+ ENDROW o
+
+		
+
+		HTML o
+			<script>
+
+				// formatter para poner en cada fila button add
+				var addbutton = function(cell, formatterParams){
+					return "<button class='btn btn-outline-dark'><i class='fa fa-plus fa-fw'></i></button>";
+				}
+
+				// TODO: Validar si podemos llevar esto al backend
+				// validar event click en una celda en específico en el browse
+				function CellClickBrowse(e, cell) {
+  				if (cell.getColumn().getField() == 'agregar') {
+    				var rowData = cell.getRow().getData();
+				    // Comprobar si "cantidad" está vacío
+    				if (rowData.cantidad === undefined || rowData.cantidad === null || rowData.cantidad === '') {      			
+      				MsgError('Ingrese cantidad', null, 'Atención');
+      				return null;
+    				} else {
+      				var oPar = new Object();
+      				oPar['codigo'] = rowData.codigo;
+							oPar['producto'] = rowData.producto;
+							oPar['precio'] = rowData.precio;
+							oPar['cantidad'] = rowData.cantidad;
+
+							MsgApi('myapi', 'add_product', oPar, 'listProducts');
+
+							// esto quita el dato capturado en el selector de productos
+							myTable = Tabulator.findTable("#listProducts-tableListProducts")[0];
+							// en el selector de productos
+							// código es nuestro id, en este caso al ser un catálogo de productos son códigos únicos, por eso tomamos código como id
+							myTable.updateData([{ id: rowData.id, cantidad: null }]);
+    			}
+  			}
+			}
+
+			</script>
+		ENDTEXT
+		ENDFORM o
+	INIT DIALOG oDlg RETURN
+?>

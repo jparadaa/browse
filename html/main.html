@@ -1,0 +1,102 @@
+<?prg
+#include "lib/tweb/tweb.ch" 
+
+  local o, oWeb
+
+	DEFINE WEB oWeb TITLE 'Browse'
+		oWeb:cCharset = 'UTF-8'
+
+		oWeb:AddCss( 'https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator_simple.min.css' )
+
+		
+		HTML oWeb
+		<style>	
+  .no-animation {
+    transition: none !important;
+  }
+
+
+.no-bold {
+    font-weight: normal;
+}
+
+.cell-font-size {
+    font-size: 12px;
+}
+
+.header-font-size {
+    font-size: 14px;
+}
+
+
+</style>
+ENDTEXT
+
+		DEFINE FORM o ID 'myscreen' API 'myapi' OF oWeb
+		o:lDessign 	:= .f.
+		o:lFluid	:= .f.
+
+		INIT FORM o
+		ROW o CLASS 'pt-5' VALIGN 'bottom'
+			COL o GRID 4
+				BUTTON LABEL 'Agrega producto'  ACTION 'select_products' ALIGN 'center' GRID 12 CLASS 'btn-secondary' OF o
+			ENDCOL o
+
+			COL o GRID 4
+				ROW o
+					BUTTON LABEL 'Totales'  ACTION 'dlg_total' ALIGN 'center' GRID 4 CLASS 'btn-primary' OF o
+					BUTTON LABEL 'Get data server'  ACTION 'get_data' ALIGN 'center' GRID 8 CLASS 'btn-primary' OF o
+				ENDROW o
+			ENDCOL o
+
+			//COL o GRID 4
+			//	BUTTON LABEL 'Obtener data Javascript'  ACTION '' ALIGN 'center' GRID 12 CLASS 'btn-primary' OF o
+			//ENDCOL o
+		ENDROW o
+
+		// browse
+		ROW o CLASS 'pt-3'
+	 COL o GRID 10
+		 aOptions := { ;
+			 'height' => '280px',	;			 
+			 'rowHeight' => 40, ;  //set rows to 40px height // controla el alto de la fila del browse esto útil para mobile			 
+			 'placeholder'  => '', ;
+			 'selectable' => 1 , ;
+			 'initialSort' => nil ;
+		 }
+		 formatterOptions := { ;
+			'decimal' => "." 	, ;
+			'thousand' => "," , ;			
+			'precision' => .f. ;
+		}
+				
+		aEvents := { ;
+									{ 'name' => 'cellEdited' , 'proc' => 'update_item'}, ;
+									{ 'name' => 'cellClick'  , 'function' => 'cellClickBrowse' } ;
+								}
+
+		 DEFINE BROWSE oBrw ID 'tableOrder' OPTIONS aOptions EVENTS aEvents ALL OF o		 	 
+		 	 COL oCol TO oBrw CONFIG { 'title' => "<span class='header-font-size'>Código</span>"		, 'field' => "codigo"		, 'cssClass' => "no-bold cell-font-size", 'resizable' => .f. , 'headerSort' => .f., 'vertAlign' => "bottom", 'width' => 140 }
+			 COL oCol TO oBrw CONFIG { 'title' => "<span class='header-font-size'>Producto</span>"	, 'field' => "producto"	, 'cssClass' => "no-bold cell-font-size", 'resizable' => .f. , 'headerSort' => .f., 'vertAlign' => "bottom", 'width' => 250 }
+			 COL oCol TO oBrw CONFIG { 'title' => "<span class='header-font-size'>Cantidad</span>"		, 'field' => "cantidad"	, 'cssClass' => "no-bold cell-font-size", 'resizable' => .f. , 'headerSort' => .f., 'vertAlign' => "bottom", 'width' => 80, ;
+			 																																														'formatter' => 'money', 'formatterParams' => { 'decimal' => '.', 'thousand' => ',', 'precision' => '0' } , 'hozAlign' => "right" }
+			 COL oCol TO oBrw CONFIG { 'title' => "<span class='header-font-size'>Precio</span>"	, 'field' => "precio"	, 'headerSort' => .f. , 'cssClass' => "no-bold cell-font-size", 'resizable' => .f., 'hozAlign' => "right", 'headerHozAlign' => "right", 'width' => 80, ;
+			 																																													'vertAlign' => "bottom", 'formatter' => 'money' }
+			COL oCol TO oBrw CONFIG { 'title' => "<span class='header-font-size'>Total</span>"		, 'field' => "importe" 	, 'headerSort' => .f. , 'cssClass' => "no-bold cell-font-size", 'resizable' => .f., 'formatter' => 'money', 'hozAlign' => "right", 'headerHozAlign' => "right", 'width' => 80, 'vertAlign' => "bottom" }
+			 
+			 
+			 INIT BROWSE oBrw
+	 ENDCOL o	 
+ ENDROW o		
+		// fin browse
+
+		
+		ENDFORM o
+
+		HTML o
+			<script>				
+			</script>
+		ENDTEXT
+	
+	INIT WEB oWeb RETURN	
+?>
